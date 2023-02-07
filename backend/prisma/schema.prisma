@@ -25,17 +25,61 @@ model WorkoutPlan {
   workouts        Workout[]
   title         String
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
+
+  exercisePlans ExercisePlan[]
 }
+
+//  TO DO: desativar ao inves de deletar, pra salvar o historico
+model ExercisePlan {
+  id String @id @default(uuid())
+
+  title String
+
+  done Boolean @default(false)
+
+  goalReps Int
+  doneReps Int @default(0)
+
+  goalSets Int
+  doneSets Int @default(0)
+
+  userId String
+
+  workoutPlan WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workoutPlanId String
+}
+
 
 model Workout {
   id            String      @id @default(uuid())
-  done          Boolean
+  done          Boolean @default(false)
   expiresIn     DateTime
   workoutPlanId String
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @default(now()) @updatedAt
   userId String
-  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id])
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  exercises Exercise[]
+}
+
+model Exercise {
+  id String @id @default(uuid())
+
+  title String
+
+  done Boolean @default(false)
+
+  goalReps Int
+  doneReps Int @default(0)
+
+  goalSets Int
+  doneSets Int @default(0)
+
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workoutId String
+
+  userId String
 }

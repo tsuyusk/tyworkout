@@ -10,22 +10,39 @@ export class WorkoutService {
   constructor(private prismaService: PrismaService) {}
 
   async create(createWorkoutDto: CreateWorkoutDto, user: User) {
-    const { occourenceDays, title } = createWorkoutDto;
+    const { occourenceDays, title, exercises } = createWorkoutDto;
 
     const workoutPlan = await this.prismaService.workoutPlan.create({
       data: {
         occourenceDays,
         title,
         userId: user.id,
+        exercisePlans: {
+          create: exercises.map((exercise) => ({
+            title: exercise.title,
+            userId: user.id,
+            goalReps: exercise.goalReps,
+            goalSets: exercise.goalSets,
+          })),
+        },
+      },
+      include: {
+        exercisePlans: true,
       },
     });
+
+    await this.createDailyWorkout();
 
     return workoutPlan;
   }
 
   async createDailyWorkout() {
     // TODO: Consider specific days for creating workout
-    const workoutPlans = await this.prismaService.workoutPlan.findMany();
+    const workoutPlans = await this.prismaService.workoutPlan.findMany({
+      include: {
+        exercisePlans: true,
+      },
+    });
 
     workoutPlans.forEach(async (workoutPlan) => {
       const hasWorkoutForToday = await this.prismaService.workout.findFirst({
@@ -43,6 +60,14 @@ export class WorkoutService {
           workoutPlanId: workoutPlan.id,
           done: false,
           expiresIn: endOfToday(),
+          exercises: {
+            create: workoutPlan.exercisePlans.map((exercisePlan) => ({
+              title: exercisePlan.title,
+              goalReps: exercisePlan.goalReps,
+              goalSets: exercisePlan.goalSets,
+              userId: workoutPlan.id,
+            })),
+          },
         },
       });
     });
@@ -56,9 +81,34 @@ export class WorkoutService {
         expiresIn: endOfToday(),
         userId: user.id,
       },
+      include: {
+        exercises: true,
+      },
     });
 
     return workouts;
+  }
+
+  async setExerciseAsDone(id: string, user: User) {
+    const workout = await this.prismaService.exercise.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
+    });
+
+    if (!workout) {
+      throw new HttpException("Couldn't find this exercise", 400);
+    }
+
+    return await this.prismaService.exercise.update({
+      where: {
+        id,
+      },
+      data: {
+        done: true,
+      },
+    });
   }
 
   async setWorkoutAsDone(id: string, user: User) {
@@ -70,7 +120,7 @@ export class WorkoutService {
     });
 
     if (!workout) {
-      throw new HttpException("Couldn't find this workout plan", 400);
+      throw new HttpException("Couldn't find this workout", 400);
     }
 
     return await this.prismaService.workout.update({
@@ -102,5 +152,15 @@ export class WorkoutService {
     });
 
     return { ok: true };
+  }
+
+  async getWorkoutPlans(user: User) {
+    const workoutPlans = await this.prismaService.workoutPlan.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    return workoutPlans;
   }
 }

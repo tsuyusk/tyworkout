@@ -30,6 +30,12 @@ export class WorkoutController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/plans')
+  getWorkoutPlans(@Request() req) {
+    return this.workoutService.getWorkoutPlans(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Delete('/:id')
   delete(@Param('id') id: string, @Request() req) {
     return this.workoutService.delete(id, req.user);
@@ -39,5 +45,11 @@ export class WorkoutController {
   @Patch('/:id/done')
   setWorkoutAsDone(@Param('id') id: string, @Request() req) {
     return this.workoutService.setWorkoutAsDone(id, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/exercise/:id/done')
+  setExerciseAsDone(@Param('id') id: string, @Request() req) {
+    return this.workoutService.setExerciseAsDone(id, req.user);
   }
 }

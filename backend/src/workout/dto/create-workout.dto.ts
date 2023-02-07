@@ -1,4 +1,22 @@
-import { IsBoolean, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsString,
+  IsInt,
+  ValidateNested,
+  IsArray,
+  IsNotEmpty,
+} from 'class-validator';
+
+export class CreateExerciseDto {
+  @IsString()
+  title: string;
+
+  @IsInt()
+  goalReps: number;
+
+  @IsInt()
+  goalSets: number;
+}
 
 export class CreateWorkoutDto {
   @IsString()
@@ -6,4 +24,10 @@ export class CreateWorkoutDto {
 
   @IsString()
   title: string;
+
+  @IsArray()
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => CreateExerciseDto)
+  exercises: CreateExerciseDto[];
 }

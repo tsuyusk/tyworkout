@@ -8,78 +8,61 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String
-  password  String
-  image     String   @default("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
+  id           String        @id @default(uuid())
+  name         String
+  email        String
+  password     String
+  image        String        @default("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now()) @updatedAt
   workoutPlans WorkoutPlan[]
 }
 
 model WorkoutPlan {
-  id             String    @id @default(uuid())
+  id             String         @id @default(uuid())
   occourenceDays String
-  workouts        Workout[]
-  title         String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String
-
-  exercisePlans ExercisePlan[]
+  title          String
+  userId         String
+  exercisePlans  ExercisePlan[]
+  workouts       Workout[]
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-//  TO DO: desativar ao inves de deletar, pra salvar o historico
 model ExercisePlan {
-  id String @id @default(uuid())
-
-  title String
-
-  done Boolean @default(false)
-
-  goalReps Int
-  doneReps Int @default(0)
-
-  goalSets Int
-  doneSets Int @default(0)
-
-  userId String
-
-  workoutPlan WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id            String      @id @default(uuid())
+  title         String
+  goalReps      Int
+  doneReps      Int         @default(0)
+  goalSets      Int
+  doneSets      Int         @default(0)
   workoutPlanId String
+  done          Boolean     @default(false)
+  userId        String
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
 }
-
 
 model Workout {
   id            String      @id @default(uuid())
-  done          Boolean @default(false)
+  done          Boolean     @default(false)
   expiresIn     DateTime
   workoutPlanId String
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @default(now()) @updatedAt
-  userId String
-  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  exercises Exercise[]
+  userId        String
+  title         String
+  exercises     Exercise[]
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
 }
 
 model Exercise {
-  id String @id @default(uuid())
-
-  title String
-
-  done Boolean @default(false)
-
-  goalReps Int
-  doneReps Int @default(0)
-
-  goalSets Int
-  doneSets Int @default(0)
-
-  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id        String  @id @default(uuid())
+  title     String
+  goalReps  Int
+  doneReps  Int     @default(0)
+  goalSets  Int
+  doneSets  Int     @default(0)
   workoutId String
-
-  userId String
+  done      Boolean @default(false)
+  userId    String
+  workout   Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
 }

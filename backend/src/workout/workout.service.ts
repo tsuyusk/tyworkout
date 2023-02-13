@@ -31,17 +31,24 @@ export class WorkoutService {
       },
     });
 
-    await this.createDailyWorkout();
+    await this.createDailyWorkout(user.id);
 
     return workoutPlan;
   }
 
-  async createDailyWorkout() {
+  async createDailyWorkout(userId?: string) {
     // TODO: Consider specific days for creating workout
     const workoutPlans = await this.prismaService.workoutPlan.findMany({
       include: {
         exercisePlans: true,
       },
+      ...(userId
+        ? {
+            where: {
+              userId,
+            },
+          }
+        : {}),
     });
 
     workoutPlans.forEach(async (workoutPlan) => {
@@ -58,6 +65,7 @@ export class WorkoutService {
         data: {
           userId: workoutPlan.userId,
           workoutPlanId: workoutPlan.id,
+          title: workoutPlan.title,
           done: false,
           expiresIn: endOfToday(),
           exercises: {

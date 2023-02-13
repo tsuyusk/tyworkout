@@ -35,6 +35,7 @@ const AuthContextProvider: React.FC<ProviderProps> = ({ children }) => {
       if (storagedUser && storagedToken) {
         setUser(JSON.parse(storagedUser));
         api.defaults.headers.authorization = JSON.parse(storagedToken);
+        setIsAuthenticated(true);
       }
 
       setHasRunUseEffect(true);
@@ -46,7 +47,7 @@ const AuthContextProvider: React.FC<ProviderProps> = ({ children }) => {
 
     api.defaults.headers.authorization = bearerToken;
 
-    await AsyncStorage.setItem('@TYWorkout/User', JSON.stringify(user));
+    await AsyncStorage.setItem('@TYWorkout/User', JSON.stringify(userData));
     await AsyncStorage.setItem('@TYWorkout/Token', JSON.stringify(bearerToken));
 
     setIsAuthenticated(true);
